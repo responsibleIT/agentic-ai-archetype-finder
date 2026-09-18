@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic AI Archetype Finder</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap">
+<style>
+  :root {
+    --ground: #FFFFFF; --surface: #FFFFFF; --surface-alt: #F2F1F7;
+    --ink: #000000; --muted: #4A4A55; --rule: #DDDBE6; --line: #000000;
+    --accent: #25167A; --accent-soft: #ECEAF5; --flag: #F35279; --flag-soft: #FDEDF2;
+    --you: #25167A; --arch: #02857D; --fresh: #02857D; --sweet: #F35279;
+    --serif: "Open Sans", Arial, sans-serif;
+    --sans: "Open Sans", Arial, Helvetica, sans-serif;
+    --mono: "Open Sans", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #1E1649; --surface: #241B57; --surface-alt: #2C2266;
+      --ink: #FFFFFF; --muted: #B9B4D6; --rule: #3A3172; --line: #FFFFFF;
+      --accent: #B7ACFF; --accent-soft: #2E2570; --flag: #F35279; --flag-soft: #3D1E3A;
+      --you: #B7ACFF; --arch: #3FD1C4; --fresh: #3FD1C4; --sweet: #F35279;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1E1649; --surface: #241B57; --surface-alt: #2C2266;
+    --ink: #FFFFFF; --muted: #B9B4D6; --rule: #3A3172; --line: #FFFFFF;
+    --accent: #B7ACFF; --accent-soft: #2E2570; --flag: #F35279; --flag-soft: #3D1E3A;
+    --you: #B7ACFF; --arch: #3FD1C4; --fresh: #3FD1C4; --sweet: #F35279;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { border-bottom: 3px solid var(--ink); padding: 0 0 22px; margin-bottom: 28px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .tri { display: inline-block; width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-bottom: 19px solid var(--accent); }
+  .tri.b { border-bottom-color: var(--ink); }
+  .tri.f { border-bottom-color: var(--fresh); }
+  .brand .lab { font-weight: 800; font-size: 13px; letter-spacing: .02em; text-transform: uppercase; }
+  .brand .lab span { font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: 0; margin-left: 8px; }
+  .eyebrow { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  h1 { font-weight: 800; font-size: clamp(28px, 4.4vw, 40px); line-height: 1.05; margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+  .sub { color: var(--muted); margin: 8px 0 0; max-width: 62ch; font-size: 14.5px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .presets span { font-size: 11.5px; font-weight: 700; color: var(--muted); width: 100%; }
+  button { font-family: var(--sans); font-size: 12.5px; font-weight: 600; padding: 7px 12px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer; border-radius: 0; }
+  button:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.ghost { color: var(--muted); }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .group { margin-bottom: 22px; }
+  .group h2 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--ink); margin: 0 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--ink); }
+  .dim { display: grid; grid-template-columns: 150px 1fr; gap: 6px 16px; padding: 10px 0; border-bottom: 1px solid var(--rule); align-items: center; }
+  .dim:last-child { border-bottom: none; }
+  .dim .name { font-weight: 600; font-size: 14px; }
+  .dim .name small { display: block; font-size: 11px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .ctl { display: grid; grid-template-columns: 1fr; gap: 3px; }
+  .poles { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+  input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+  .val { font-size: 12.5px; color: var(--ink); min-height: 18px; }
+  .val b { color: var(--accent); font-weight: 800; margin-right: 6px; }
+  .val em { color: var(--muted); font-style: normal; }
+  @media (max-width: 560px) { .dim { grid-template-columns: 1fr; } }
+
+  .result { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 18px; }
+  .card { background: var(--surface); border: 1.5px solid var(--ink); padding: 18px 20px; }
+  .card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); margin: 0 0 8px; font-weight: 800; }
+  .match-name { font-size: 26px; font-weight: 800; line-height: 1.15; margin: 0; letter-spacing: -.01em; }
+  .match-meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .match-meta b { color: var(--accent); font-weight: 700; }
+  .desc { font-size: 14px; margin-top: 10px; max-width: 58ch; }
+  .runners { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .runner { display: grid; grid-template-columns: 1fr auto; gap: 12px; font-size: 13px; padding: 6px 0; border-top: 1px solid var(--rule); }
+  .runner .pct { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .bar { height: 4px; background: var(--surface-alt); margin-top: 4px; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  ul.ex { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; }
+  ul.ex li { margin-bottom: 4px; }
+  .notes { display: flex; flex-direction: column; gap: 8px; }
+  .note { background: var(--flag-soft); border-left: 4px solid var(--flag); padding: 8px 12px; font-size: 13px; }
+  .note b { color: var(--ink); font-weight: 700; }
+  .quiet { color: var(--muted); font-size: 13px; }
+  .diffs { font-size: 13px; margin-top: 8px; }
+  .diffs div { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 3px 0; border-top: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+  .diffs div span:nth-child(2) { color: var(--you); font-weight: 700; font-size: 12px; }
+  .diffs div span:nth-child(3) { color: var(--arch); font-weight: 700; font-size: 12px; }
+  .legend { display: flex; gap: 16px; font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; }
+  svg text { font-family: var(--sans); }
+  .profile { font-family: Consolas, Menlo, monospace; font-size: 11px; color: var(--muted); word-break: break-all; margin-top: 8px; user-select: all; }
+  .rules { margin-top: 36px; border: 1.5px solid var(--ink); background: var(--surface); }
+  .rules summary { cursor: pointer; padding: 12px 20px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--ink); list-style: none; }
+  .rules summary::-webkit-details-marker { display: none; }
+  .rules summary::before { content: "+ "; color: var(--accent); }
+  .rules[open] summary::before { content: "− "; }
+  .rules-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px 32px; padding: 4px 20px 20px; border-top: 1px solid var(--rule); }
+  @media (max-width: 900px) { .rules-body { grid-template-columns: 1fr; } }
+  .rules-body h4 { font-size: 15px; font-weight: 800; margin: 14px 0 4px; }
+  .rules-body p { font-size: 13.5px; margin: 0 0 6px; max-width: 64ch; }
+  .rules-table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 14px; }
+  .rules-table th { text-align: left; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); font-weight: 800; padding: 6px 8px 6px 0; border-bottom: 2px solid var(--line); }
+  .rules-table td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .rules-table td:first-child { font-weight: 600; white-space: nowrap; }
+  .rules-table td:nth-child(2) { font-size: 12px; }
+  .rules-table tr.on td { background: var(--flag-soft); }
+  .rules-table td:last-child { color: var(--muted); }
+  footer { margin-top: 36px; border-top: 3px solid var(--ink); padding-top: 14px; font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand"><i class="tri"></i><i class="tri b"></i><i class="tri f"></i><span class="lab">Responsible AI Lab<span>Hogeschool van Amsterdam</span></span></div>
+      <div class="eyebrow">Early-stage prototype</div>
+      <h1>Agentic AI Archetype Finder</h1>
+      <p class="sub">Score a real system on twelve dimensions, each running from one pole to the other. The finder shows the nearest archetype, how far off it is, and comparable cases. Scores are ordinal: shapes can be compared, totals mean nothing.</p>
+    </div>
+    <div class="presets" id="presets"><span>Load an archetype profile</span></div>
+  </header>
+
+  <div class="grid">
+    <div id="dims"></div>
+
+    <div class="result">
+      <div class="card">
+        <h3>Nearest archetype</h3>
+        <p class="match-name" id="mName">—</p>
+        <div class="match-meta" id="mMeta"></div>
+        <p class="desc" id="mDesc"></p>
+        <div class="runners" id="runners"></div>
+      </div>
+
+      <div class="card">
+        <h3>Your profile against the archetype</h3>
+        <div id="radar"></div>
+        <div class="legend"><span><i style="background:var(--you)"></i>this system</span><span><i style="background:var(--arch)"></i>nearest archetype</span></div>
+        <div class="diffs" id="diffs"></div>
+      </div>
+
+      <div class="card">
+        <h3>Comparable cases</h3>
+        <ul class="ex" id="examples"></ul>
+        <p class="quiet" style="margin:10px 0 0">Illustrative placements, not deployments.</p>
+      </div>
+
+      <div class="card" id="notesCard">
+        <h3>Notes on this profile</h3>
+        <div class="notes" id="notes"></div>
+      </div>
+
+      <div class="card">
+        <h3>Profile string</h3>
+        <div class="profile" id="pstr"></div>
+        <p class="quiet" style="margin:8px 0 0">Copy this into an e-mail or a sheet. Order follows the dimensions on the left.</p>
+      </div>
+    </div>
+  </div>
+
+  <details class="rules" id="rules">
+    <summary>How the result is determined</summary>
+    <div class="rules-body">
+      <div>
+        <h4>0 · The scales</h4>
+        <p>Nine dimensions have three anchors and take the scores 1, 3 or 5 only. Control flow, tool use and human role have five named levels and take 1 to 5. Every score is a named position; there are no in-between values to interpret.</p>
+        <h4>1 · The gate: is it agentic?</h4>
+        <p>Take the five agency dimensions: control flow, tool use, underspecification, goal directedness, long term planning. The agency level is the <b>highest</b> of the five scores, never their sum. 1 is none (not agentic), 2 low, 3 moderate, 4 and 5 high. A system is agentic when any of the five is 2 or more, because that is where a model first decides something at run time. The other seven dimensions do not count toward the gate: memory or learning make a system adaptive, not agentic; multiplicity and human role say what kind of agentic system it is.</p>
+        <h4>2 · The match: which shape is it closest to?</h4>
+        <p>The gate splits the six archetypes into two groups: <b>Not agentic</b> stands alone; the other five are agentic. A system is compared only with the archetypes in its own group, so a non-agentic profile always lands on Not agentic and the match then only says how far it is from the pure case. Distance is the sum, over the twelve dimensions, of the absolute difference between the system's score and the archetype's score; the nearest archetype is the one with the smallest distance, ties going to the earlier one in the list. Match % is 1 − distance / 48, where 48 is the largest possible distance (12 × 4). Scores are ordinal, so distance ranks archetypes and nothing more.</p>
+        <h4>3 · The notes</h4>
+        <p>Rules fire on combinations of the profile and the three context attributes. They never change the match; context enters only here.</p>
+      </div>
+      <table class="rules-table" id="rules-table"><thead><tr><th>Note</th><th>Fires when</th><th>Reads context</th></tr></thead><tbody></tbody></table>
+    </div>
+  </details>
+  <footer>
+    One source per dimension: Schonenberg et al. 2008, with van der Aalst (control flow), Mialon et al. 2023 (tool use), Chan et al. 2023 (underspecification, directness of impact, goal directedness, long term planning), Sumers et al. 2023 (memory), Russell &amp; Norvig 2021 (learning), Wooldridge 2009 (number of agents, orchestration), Hammond et al. 2025 (ownership), Feng, McDonald &amp; Zhang 2025 (human role; corroborated by Morris et al. 2024). Context attributes, reversibility, error tolerance, data sensitivity, after IMDA 2026; they do not enter the match.<br>
+    Whether a system is agentic is a gate, not a match: the highest score on control flow, tool use, underspecification, goal directedness and long term planning, agentic from 2 up. The archetype match then runs within that group. Distance is the sum of absolute differences across the twelve dimensions. The form of the input and output (structured or free text) is deliberately not a dimension: it describes the interface, not the agency, and it was pulling the match around.<br>
+    The approach, the dimensions and the archetypes were developed by colleagues at the Responsible IT Lab of the Hogeschool van Amsterdam. This is a prototype at a very early stage: placements, thresholds and archetypes are still under discussion and will change. The code was vibe-coded with Claude Code, and should be read as a sketch of the method, not as a validated instrument.
+  </footer>
+</div>
+
+<script>
+(function () {
+  const DIMS = [
+    { key: "control", group: "Control", name: "Control flow", src: "Schonenberg et al. 2008, with van der Aalst", levels: ["fully fixed: an imperative process model, every path prescribed; the model only fills a task inside it. The flow is deterministic, what the model produces inside the task is still probabilistic", "flexibility by design: branches modelled in advance, the model decides the gateway", "flexibility by deviation: the model may depart from the prescribed order, within bounds", "flexibility by underspecification: the flow has open parts the model fills at run time", "flexibility by change: the model creates or rewrites the flow, including code"], poles: ["flow fixed by people", "flow decided by the model"] },
+    { key: "tools", group: "Control", name: "Tool use", src: "Mialon et al. 2023", levels: ["none, text only", "information-gathering tools: search, retrieval, read", "tools that act on internal systems: write, update", "tools that act outside the organisation: external APIs, other systems", "creates or acquires its own tools"], poles: ["none", "makes its own tools"] },
+    { key: "underspec", group: "Agency, after Chan et al. 2023", name: "Underspecification", src: "Chan et al. 2023", anchors: ["every step specified", "goal and constraints given, method free", "open goal, sub-goals and method free"], poles: ["fully specified", "open goal"] },
+    { key: "impact", group: "Agency, after Chan et al. 2023", name: "Directness of impact", src: "Chan et al. 2023", anchors: ["every output passes a person", "acts on internal systems unmediated", "acts on citizens or the world, legal effect"], poles: ["mediated", "direct, legal effect"] },
+    { key: "goal", group: "Agency, after Chan et al. 2023", name: "Goal directedness", src: "Chan et al. 2023", anchors: ["reacts to each input", "pursues a set task to completion", "persistently optimises an objective"], poles: ["reactive", "optimising"] },
+    { key: "planning", group: "Agency, after Chan et al. 2023", name: "Long term planning", src: "Chan et al. 2023", anchors: ["single step, no dependency", "multi-step within one task", "plans across tasks and over time"], poles: ["single step", "long horizon"] },
+    { key: "memory", group: "State", name: "Memory", src: "Sumers et al. 2023", anchors: ["one call only: the context window; nothing survives the call", "one session or episode: retained while the task runs, then discarded", "persistent: kept across cases and sessions, and shared across agents"], poles: ["one call", "persistent and shared"] },
+    { key: "learning", group: "State", name: "Learning", src: "Russell & Norvig 2021, learning agents", anchors: ["frozen: the policy never changes after deployment", "retrained: the policy is updated periodically, offline, by people, under change control", "continual: the policy changes in deployment from its own experience, without a release"], poles: ["frozen policy", "learns in deployment"] },
+    { key: "nagents", group: "Multiplicity", name: "Number of agents", src: "Wooldridge 2009", anchors: ["one", "a few, fixed roles", "many, dynamic population"], poles: ["one", "many"] },
+    { key: "orch", group: "Multiplicity", name: "Orchestration", src: "Wooldridge 2009", anchors: ["none", "central orchestrator with delegation", "open negotiation, emergent coordination"], poles: ["none", "emergent"] },
+    { key: "owner", group: "Multiplicity", name: "Ownership", src: "Hammond et al. 2025", anchors: ["one organisation", "several under one agreement or chain", "open, including citizens' and third-party agents"], poles: ["one owner", "open"] },
+    { key: "human", group: "Human role", name: "Human role", src: "Feng, McDonald & Zhang 2025", levels: ["operator: the person directs all decisions, the agent only executes", "collaborator: the person and the agent share planning and execution", "consultant: the agent leads and consults the person on preferences", "approver: the agent acts, and asks approval for high-risk steps", "observer: the agent acts fully autonomously, the person can only monitor or stop"], poles: ["operator", "observer"] }
+  ];
+
+  const ARCH = [
+    { name: "Not agentic", labels: "human role: operator", p: [1,1,1,1,1,1,1,1,1,1,1,1],
+      desc: "An AI system in the sense of art. 3(1) that takes an input, produces an output and stops: a prediction, a classification, or generated text on request. No run-time decisions about flow, tools or goal; a person or a fixed process acts on the output. Existing frameworks apply as they stand. Whether the input is a record or a prompt makes no difference here.",
+      ex: ["Risk score for fraud or non-compliance, used by a case handler", "Document classifier or OCR feeding a case system", "Demand or capacity forecasting model", "Spam or abuse filter that labels messages", "Drafting and summarising support for a policy officer", "Reformulating letters to citizens at B1 level, officer sends"] },
+    { name: "Scripted workflow", labels: "human role: collaborator", p: [2,2,1,3,1,1,1,1,1,1,1,2],
+      desc: "People fixed the steps; the model fills slots and picks branches. Often marketed as agentic, and mostly covered by existing frameworks.",
+      ex: ["Intake, classification and routing of incoming documents", "Extracting fields from forms into a case system", "Triage of information requests by topic and urgency", "Customer service chatbot with fixed intents and scripted flows, model picks the intent", "Retrieval-based Q&A assistant: documents are fetched by code and injected, the model only answers", "E-mail classifier that files messages and sends a template reply per category"] },
+    { name: "Tool-using agent", labels: "human role: consultant", p: [3,3,3,3,3,3,3,1,1,1,1,3],
+      desc: "The model decides which tools to call and when, within one case, with a person steering. The first archetype where an action in a system is a model decision.",
+      ex: ["A case handler steers an agent that looks up and updates records", "Preparing a draft decision with retrieved precedents, handler approves", "Answering citizen questions with lookups in registers, handler checks", "Coding assistant in agent mode: edits files and runs tests, developer approves each change", "Customer service agent that looks up an order and proposes a refund, agent confirms before it is issued", "Research assistant that searches, reads and compiles a briefing while the user steers"] },
+    { name: "Autonomous agent", labels: "human role: observer", p: [4,3,3,5,5,3,5,1,1,1,1,5],
+      desc: "Runs unattended within a mandate; a person monitors and can stop it. Errors propagate silently, so logging and the ability to undo carry the oversight.",
+      ex: ["Unattended reconciliation between two registers", "Data quality repair in a basisregistratie", "Monitoring agent that flags anomalies and opens tickets", "Chat moderation agent that hides or removes messages in a community channel, moderators review afterwards", "Background coding agent that picks up an issue, writes the fix and opens a pull request", "Agentic browser that completes a booking or a form end to end from one instruction", "E-mail agent that triages a mailbox and sends routine replies on its own"] },
+    { name: "Orchestrated multi-agent", labels: "human role: approver", p: [4,3,5,3,5,5,5,1,3,3,1,4],
+      desc: "Several agents with distinct roles under one owner and one orchestrator; a person approves the plan or the high-risk steps. Attribution inside the system is the problem.",
+      ex: ["Inspectorate analysis pipeline: planner, retriever, checker", "Policy analysis pipeline producing an assessed memo", "Grant application assessment with a separate reviewer agent", "Software engineering team of agents: planner, coder, tester, under one orchestrator", "Deep research system that spawns sub-agents per sub-question and merges their findings", "Content pipeline: writer, fact-checker and editor agents before a person publishes"] },
+    { name: "Cross-organisation agents", labels: "human role: observer", p: [5,5,5,5,5,5,5,3,5,5,5,5],
+      desc: "Agents owned by different organisations interact through protocols; no single party can apply approval, boundary or monitoring to the whole exchange. No governance story exists yet.",
+      ex: ["Agents acting across a chain of executive bodies", "Citizens' own agents applying for services", "Agents negotiating data exchange between municipalities and national registers", "Shopping agents negotiating with merchant agents on price and delivery", "Company agents interoperating through open protocols, each answering to its own owner", "Automated bidding or procurement agents dealing with counterpart agents"] }
+  ];
+
+  const CTX = [{"key": "reversibility", "name": "Reversibility", "src": "IMDA 2026, impact factors", "poles": ["undo built in", "irreversible"], "anchors": ["fully reversible: actions can be undone, versioned or rolled back", "reversible within a window, or by a compensating action", "irreversible: a payment sent, a decision notified, a physical action taken"]}, {"key": "tolerance", "name": "Error tolerance of the domain", "src": "IMDA 2026, impact factors", "poles": ["errors are cheap", "errors cause harm"], "anchors": ["errors are cheap and expected: drafts, suggestions, internal analysis", "errors are costly but correctable through the normal process: objection, correction", "errors cause serious harm to people or rights before they can be caught"]}, {"key": "sensitivity", "name": "Data sensitivity", "src": "IMDA 2026, impact factors", "poles": ["public data", "special category"], "anchors": ["public or non-personal data", "personal data of ordinary sensitivity", "special-category data (health, criminal, biometric) or classified information"]}];
+  const ctx = CTX.map(() => 1);
+  const state = DIMS.map(() => 1);
+
+  function anchorText(d, v) {
+    if (d.levels) return d.levels[v - 1];
+    if (v === 1) return d.anchors[0];
+    if (v === 3) return d.anchors[1];
+    if (v === 5) return d.anchors[2];
+    return "";
+  }
+
+  const dimsEl = document.getElementById("dims");
+  let lastGroup = null, groupEl = null;
+  DIMS.forEach((d, i) => {
+    if (d.group !== lastGroup) {
+      groupEl = document.createElement("div"); groupEl.className = "group";
+      const h = document.createElement("h2"); h.textContent = d.group; groupEl.appendChild(h);
+      dimsEl.appendChild(groupEl); lastGroup = d.group;
+    }
+    const row = document.createElement("div"); row.className = "dim";
+    row.innerHTML = `
+      <div class="name">${d.name}<small>${d.src}</small></div>
+      <div class="ctl">
+        <div class="poles"><span>1 · ${d.poles[0]}</span><span>5 · ${d.poles[1]}</span></div>
+        <input type="range" min="1" max="5" step="${d.levels ? 1 : 2}" value="${state[i]}" aria-label="${d.name}" data-i="${i}">
+        <div class="val" id="val-${i}"></div>
+      </div>`;
+    groupEl.appendChild(row);
+  });
+  dimsEl.addEventListener("input", (e) => {
+    if (e.target && e.target.type === "range" && e.target.dataset.i !== undefined) { state[+e.target.dataset.i] = +e.target.value; render(); }
+    if (e.target && e.target.type === "range" && e.target.dataset.c !== undefined) { ctx[+e.target.dataset.c] = +e.target.value; render(); }
+  });
+  {
+    const g = document.createElement("div"); g.className = "group ctxgroup";
+    const h = document.createElement("h2"); h.textContent = "Context, after IMDA 2026"; g.appendChild(h);
+    const note = document.createElement("p"); note.className = "quiet"; note.style.margin = "0 0 6px"; note.textContent = "Not part of the typology and not used for matching. Describes the environment the system is wired into; changes which notes fire."; g.appendChild(note);
+    CTX.forEach((d, i) => {
+      const row = document.createElement("div"); row.className = "dim";
+      row.innerHTML = `
+        <div class="name">${d.name}<small>${d.src}</small></div>
+        <div class="ctl">
+          <div class="poles"><span>1 · ${d.poles[0]}</span><span>5 · ${d.poles[1]}</span></div>
+          <input type="range" min="1" max="5" step="2" value="${ctx[i]}" aria-label="${d.name}" data-c="${i}">
+          <div class="val" id="cval-${i}"></div>
+        </div>`;
+      g.appendChild(row);
+    });
+    dimsEl.appendChild(g);
+  }
+  function ctxText(d, v) {
+    if (v === 1) return d.anchors[0]; if (v === 3) return d.anchors[1]; if (v === 5) return d.anchors[2];
+    return "";
+  }
+
+  const presetsEl = document.getElementById("presets");
+  ARCH.forEach((a, k) => {
+    const b = document.createElement("button"); b.textContent = a.name; b.type = "button";
+    b.addEventListener("click", () => { a.p.forEach((v, i) => state[i] = v); syncSliders(); render(); });
+    presetsEl.appendChild(b);
+  });
+  const reset = document.createElement("button"); reset.textContent = "Reset to 1"; reset.className = "ghost"; reset.type = "button";
+  reset.addEventListener("click", () => { state.forEach((_, i) => state[i] = 1); ctx.forEach((_, i) => ctx[i] = 1); syncSliders(); render(); });
+  presetsEl.appendChild(reset);
+
+  function syncSliders() { dimsEl.querySelectorAll("input[type=range]").forEach(r => { if (r.dataset.i !== undefined) r.value = state[+r.dataset.i]; if (r.dataset.c !== undefined) r.value = ctx[+r.dataset.c]; }); }
+
+  function dist(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += Math.abs(a[i] - b[i]); return s; }
+  const AGENCY_KEYS = ["control", "tools", "underspec", "goal", "planning"];
+  const AGENCY_LABELS = { 1: "none", 2: "low", 3: "moderate", 4: "high", 5: "high" };
+  function agency(v) {
+    const idx = AGENCY_KEYS.map(k => DIMS.findIndex(d => d.key === k));
+    const level = Math.max(...idx.map(i => v[i]));
+    const drivers = idx.filter(i => v[i] === level && level > 1).map(i => DIMS[i].name);
+    return { level, label: AGENCY_LABELS[level], agentic: level >= 2, drivers };
+  }
+  const MAXD = DIMS.length * 4;
+
+  function radar(you, arch) {
+    const n = DIMS.length, cx = 190, cy = 175, R = 118;
+    const pt = (i, v) => { const ang = -Math.PI / 2 + i * 2 * Math.PI / n; const r = R * (v - 1) / 4; return [cx + r * Math.cos(ang), cy + r * Math.sin(ang)]; };
+    let rings = "";
+    for (let k = 1; k <= 4; k++) { const r = R * k / 4; let d = ""; for (let i = 0; i < n; i++) { const ang = -Math.PI / 2 + i * 2 * Math.PI / n; d += (i ? "L" : "M") + (cx + r * Math.cos(ang)).toFixed(1) + "," + (cy + r * Math.sin(ang)).toFixed(1); } rings += `<path d="${d}Z" fill="none" stroke="var(--rule)" stroke-width="1"/>`; }
+    let spokes = "", labels = "";
+    for (let i = 0; i < n; i++) {
+      const [x, y] = pt(i, 5); spokes += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--rule)" stroke-width="1"/>`;
+      const ang = -Math.PI / 2 + i * 2 * Math.PI / n; const lx = cx + (R + 16) * Math.cos(ang), ly = cy + (R + 16) * Math.sin(ang);
+      const anchor = Math.abs(Math.cos(ang)) < 0.2 ? "middle" : (Math.cos(ang) > 0 ? "start" : "end");
+      labels += `<text x="${lx.toFixed(1)}" y="${(ly + 3).toFixed(1)}" font-size="9.5" font-weight="600" fill="var(--muted)" text-anchor="${anchor}">${DIMS[i].name}</text>`;
+    }
+    const poly = (v, color, fillOp) => { let d = ""; for (let i = 0; i < n; i++) { const [x, y] = pt(i, v[i]); d += (i ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1); } return `<path d="${d}Z" fill="${color}" fill-opacity="${fillOp}" stroke="${color}" stroke-width="1.5"/>`; };
+    return `<svg viewBox="0 0 380 350" width="100%" role="img" aria-label="Radar chart of this system against the nearest archetype">${rings}${spokes}${poly(arch, "var(--arch)", 0.12)}${poly(you, "var(--you)", 0.18)}${labels}</svg>`;
+  }
+
+  const RULES = [
+    { title: "Not agentic", when: "agency level 1: all five agency dimensions at 1", ctx: false,
+      test: (g, c, ag) => !ag.agentic,
+      text: () => "No run-time agency: the flow, the tools and the goal are all fixed by people. The agentic questions in this typology do not arise; the Algoritmekader and IAMA apply as they stand. If a language model sits inside it, art. 3(1) still applies, because the model infers. Memory and learning do not make a system agentic; they make it adaptive, which is a separate property." },
+    { title: "Low agency", when: "agency level 2: the highest agency dimension is 2", ctx: false,
+      test: (g, c, ag) => ag.level === 2,
+      text: (g, c, ag) => "The only agentic element is " + ag.drivers.join(", ").toLowerCase() + ", one step above fixed. Existing frameworks largely cover this; the question to ask is whether that one step is where errors would hide." },
+    { title: "Approval bottleneck", when: "control flow ≥ 4 and human role ≤ 2", ctx: false,
+      test: (g) => g("control") >= 4 && g("human") <= 2,
+      text: () => "The model controls the loop while a person approves nearly every step. Under volume this becomes rubber stamping; approval quality is the thing to measure." },
+    { title: "Unmediated effect", when: "directness of impact = 5 and human role ≥ 4", ctx: false,
+      test: (g) => g("impact") >= 4 && g("human") >= 4,
+      text: () => "Actions reach citizens or the world without a person in between. Reversibility and traceability carry the whole oversight burden here." },
+    { title: "No single owner", when: "ownership = 5", ctx: false,
+      test: (g) => g("owner") >= 4,
+      text: () => "Agents answer to different organisations. None of the usual holds, approval, boundary or monitoring, can be applied by one party to the whole exchange." },
+    { title: "Assessment expires", when: "learning = 5", ctx: false,
+      test: (g) => g("learning") >= 4,
+      text: () => "Behaviour changes in deployment, so a placement on this grid describes the system at one moment. Re-assess on a schedule." },
+    { title: "Inconsistent placement", when: "control flow ≤ 2 and underspecification = 5", ctx: false,
+      test: (g) => g("control") <= 2 && g("underspec") >= 4,
+      text: () => "A fixed flow with an open goal is unusual. Check whether the goal is really open, or whether the flow is really fixed." },
+    { title: "Uncoordinated agents", when: "number of agents ≥ 3 and orchestration = 1", ctx: false,
+      test: (g) => g("nagents") >= 3 && g("orch") <= 1,
+      text: () => "Several agents with no orchestration. Coordination failures of the kind Hammond et al. describe are likely; check how they interact." },
+    { title: "Irreversible and unmediated", when: "directness of impact = 5 and reversibility = 5", ctx: true,
+      test: (g, c) => g("impact") >= 4 && c("reversibility") >= 4,
+      text: () => "Actions reach the world without a person in between and cannot be taken back. This is the one combination where a person has to sit before the action, not after it: move human role to approver or lower." },
+    { title: "Cheap control available", when: "directness of impact ≥ 3 and reversibility = 1", ctx: true,
+      test: (g, c) => g("impact") >= 3 && c("reversibility") <= 2,
+      text: () => "The actions can be undone. Logging plus rollback is a stronger and cheaper hold here than approval gates; invest there first." },
+    { title: "Monitoring is not enough", when: "human role ≥ 4 and error tolerance = 5", ctx: true,
+      test: (g, c) => g("human") >= 4 && c("tolerance") >= 4,
+      text: () => "Errors in this domain cause harm before they can be caught, and the person only monitors or audits. Detection after the fact does not protect anyone; move the human role left or lower the tool reach." },
+    { title: "Sensitive data crossing boundaries", when: "data sensitivity = 5 and (tool use ≥ 4 or ownership ≥ 3)", ctx: true,
+      test: (g, c) => c("sensitivity") >= 4 && (g("tools") >= 4 || g("owner") >= 3),
+      text: () => "Special-category or classified data reaches external systems or other owners. This is a data protection question before it is an agent question; involve the legal track." },
+    { title: "Sensitive data in persistent memory", when: "data sensitivity = 5 and memory = 5", ctx: true,
+      test: (g, c) => c("sensitivity") >= 4 && g("memory") >= 4,
+      text: () => "The agent retains special-category data across cases and possibly across agents. Retention, purpose limitation and access to the memory store need an owner." },
+  ];
+  function notesFor(v) {
+    const g = (k) => v[DIMS.findIndex(d => d.key === k)];
+    const c = (k) => ctx[CTX.findIndex(d => d.key === k)];
+    const ag = agency(v);
+    return RULES.filter(r => r.test(g, c, ag)).map(r => [r.title, r.text(g, c, ag)]);
+  }
+
+  function renderRules(v) {
+    const g = (k) => v[DIMS.findIndex(d => d.key === k)]; const c = (k) => ctx[CTX.findIndex(d => d.key === k)]; const ag = agency(v);
+    document.querySelector("#rules-table tbody").innerHTML = RULES.map(r => `<tr class="${r.test(g, c, ag) ? "on" : ""}"><td>${r.title}</td><td>${r.when}</td><td>${r.ctx ? "yes" : "no"}</td></tr>`).join("");
+  }
+  function render() {
+    renderRules(state);
+    DIMS.forEach((d, i) => { document.getElementById("val-" + i).innerHTML = `<b>${state[i]}</b><em>${anchorText(d, state[i])}</em>`; });
+    CTX.forEach((d, i) => { const el = document.getElementById("cval-" + i); if (el) el.innerHTML = `<b>${ctx[i]}</b><em>${ctxText(d, ctx[i])}</em>`; });
+    const ag = agency(state);
+    const ranked = ARCH.filter(a => agency(a.p).agentic === ag.agentic).map(a => ({ a, d: dist(state, a.p) })).sort((x, y) => x.d - y.d);
+    const best = ranked[0];
+    const pct = (d) => Math.round(100 * (1 - d / MAXD));
+    document.getElementById("mName").textContent = best.a.name;
+    document.getElementById("mMeta").innerHTML = `<b>${pct(best.d)}% match</b> · distance ${best.d} of ${MAXD} · ${best.a.labels}<br><b>agency: ${ag.label}</b>${ag.drivers.length ? " · driven by " + ag.drivers.join(", ").toLowerCase() : ""} · ${ag.agentic ? "matched among the five agentic archetypes" : "not agentic by the gate; the match only says how far it is from the pure case"}`;
+    document.getElementById("mDesc").textContent = best.a.desc;
+    document.getElementById("runners").innerHTML = ranked.slice(1, 4).map(r => `<div class="runner"><div>${r.a.name}<div class="bar"><i style="width:${pct(r.d)}%"></i></div></div><div class="pct">${pct(r.d)}%</div></div>`).join("");
+    document.getElementById("radar").innerHTML = radar(state, best.a.p);
+    const diffs = DIMS.map((d, i) => ({ d, y: state[i], a: best.a.p[i], gap: Math.abs(state[i] - best.a.p[i]) })).filter(x => x.gap >= 2).sort((x, y) => y.gap - x.gap);
+    document.getElementById("diffs").innerHTML = diffs.length
+      ? `<div style="border-top:none;color:var(--muted);font-size:11.5px"><span>Largest differences</span><span>you</span><span>arch.</span></div>` + diffs.map(x => `<div><span>${x.d.name}</span><span>${x.y}</span><span>${x.a}</span></div>`).join("")
+      : `<p class="quiet" style="margin:6px 0 0">Within one step of the archetype on every dimension.</p>`;
+    document.getElementById("examples").innerHTML = best.a.ex.map(e => `<li>${e}</li>`).join("");
+    const notes = notesFor(state);
+    document.getElementById("notes").innerHTML = notes.length ? notes.map(n => `<div class="note"><b>${n[0]}.</b> ${n[1]}</div>`).join("") : `<p class="quiet" style="margin:0">Nothing unusual in this combination.</p>`;
+    document.getElementById("pstr").textContent = DIMS.map((d, i) => d.key + "=" + state[i]).join(" ") + "  |  " + CTX.map((d, i) => d.key + "=" + ctx[i]).join(" ");
+  }
+
+  syncSliders();
+  render();
+})();
+</script>
+
+</body>
+</html>
