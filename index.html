@@ -167,9 +167,9 @@
     <div class="rules-body">
       <div>
         <h4>0 · The scales</h4>
-        <p>Nine dimensions have three anchors and take the scores 1, 3 or 5 only. Control flow, tool use and human role have five named levels and take 1 to 5. Every score is a named position; there are no in-between values to interpret.</p>
+        <p>Nine dimensions have three anchors and take the scores 1, 3 or 5 only. Control flow, tool use and autonomy have five named levels and take 1 to 5. Every score is a named position; there are no in-between values to interpret.</p>
         <h4>1 · The gate: is it agentic?</h4>
-        <p>Take the five agency dimensions: control flow, tool use, underspecification, goal directedness, long term planning. The agency level is the <b>highest</b> of the five scores, never their sum. 1 is none (not agentic), 2 low, 3 moderate, 4 and 5 high. A system is agentic when any of the five is 2 or more, because that is where a model first decides something at run time. The other seven dimensions do not count toward the gate: memory or learning make a system adaptive, not agentic; multiplicity and human role say what kind of agentic system it is.</p>
+        <p>Take the five agency dimensions: control flow, tool use, underspecification, goal directedness, long term planning. The agency level is the <b>highest</b> of the five scores, never their sum. 1 is none (not agentic), 2 low, 3 moderate, 4 and 5 high. A system is agentic when any of the five is 2 or more, because that is where a model first decides something at run time. The other seven dimensions do not count toward the gate: memory or learning make a system adaptive, not agentic; multiplicity and autonomy say what kind of agentic system it is.</p>
         <h4>2 · The match: which shape is it closest to?</h4>
         <p>The gate splits the six archetypes into two groups: <b>Not agentic</b> stands alone; the other five are agentic. A system is compared only with the archetypes in its own group, so a non-agentic profile always lands on Not agentic and the match then only says how far it is from the pure case. Distance is the sum, over the twelve dimensions, of the absolute difference between the system's score and the archetype's score; the nearest archetype is the one with the smallest distance, ties going to the earlier one in the list. Match % is 1 − distance / 48, where 48 is the largest possible distance (12 × 4). Scores are ordinal, so distance ranks archetypes and nothing more.</p>
         <h4>3 · The notes</h4>
@@ -179,7 +179,7 @@
     </div>
   </details>
   <footer>
-    One source per dimension: Schonenberg et al. 2008, with van der Aalst (control flow), Mialon et al. 2023 (tool use), Chan et al. 2023 (underspecification, directness of impact, goal directedness, long term planning), Sumers et al. 2023 (memory), Russell &amp; Norvig 2021 (learning), Wooldridge 2009 (number of agents, orchestration), Hammond et al. 2025 (ownership), Feng, McDonald &amp; Zhang 2025 (human role; corroborated by Morris et al. 2024). Context attributes, reversibility, error tolerance, data sensitivity, after IMDA 2026; they do not enter the match.<br>
+    One source per dimension: Schonenberg et al. 2008, with van der Aalst (control flow), Mialon et al. 2023 (tool use), Chan et al. 2023 (underspecification, directness of impact, goal directedness, long term planning), Sumers et al. 2023 (memory), Russell &amp; Norvig 2021 (learning), Wooldridge 2009 (number of agents, orchestration), Hammond et al. 2025 (ownership), Feng, McDonald &amp; Zhang 2025 (autonomy; corroborated by Morris et al. 2024). Context attributes, reversibility, error tolerance, data sensitivity, after IMDA 2026; they do not enter the match.<br>
     Whether a system is agentic is a gate, not a match: the highest score on control flow, tool use, underspecification, goal directedness and long term planning, agentic from 2 up. The archetype match then runs within that group. Distance is the sum of absolute differences across the twelve dimensions. The form of the input and output (structured or free text) is deliberately not a dimension: it describes the interface, not the agency, and it was pulling the match around.<br>
     The approach, the dimensions and the archetypes were developed by colleagues at the Responsible IT Lab of the Hogeschool van Amsterdam. This is a prototype at a very early stage: placements, thresholds and archetypes are still under discussion and will change. The code was vibe-coded with Claude Code, and should be read as a sketch of the method, not as a validated instrument.
   </footer>
@@ -199,26 +199,26 @@
     { key: "nagents", group: "Multiplicity", name: "Number of agents", src: "Wooldridge 2009", anchors: ["one", "a few, fixed roles", "many, dynamic population"], poles: ["one", "many"] },
     { key: "orch", group: "Multiplicity", name: "Orchestration", src: "Wooldridge 2009", anchors: ["none", "central orchestrator with delegation", "open negotiation, emergent coordination"], poles: ["none", "emergent"] },
     { key: "owner", group: "Multiplicity", name: "Ownership", src: "Hammond et al. 2025", anchors: ["one organisation", "several under one agreement or chain", "open, including citizens' and third-party agents"], poles: ["one owner", "open"] },
-    { key: "human", group: "Human role", name: "Human role", src: "Feng, McDonald & Zhang 2025", levels: ["operator: the person directs all decisions, the agent only executes", "collaborator: the person and the agent share planning and execution", "consultant: the agent leads and consults the person on preferences", "approver: the agent acts, and asks approval for high-risk steps", "observer: the agent acts fully autonomously, the person can only monitor or stop"], poles: ["operator", "observer"] }
+    { key: "human", group: "Autonomy", name: "Autonomy", src: "Feng, McDonald & Zhang 2025", levels: ["operator: the person directs all decisions, the agent only executes", "collaborator: the person and the agent share planning and execution", "consultant: the agent leads and consults the person on preferences", "approver: the agent acts, and asks approval for high-risk steps", "observer: the agent acts fully autonomously, the person can only monitor or stop"], poles: ["operator", "observer"] }
   ];
 
   const ARCH = [
-    { name: "Not agentic", labels: "human role: operator", p: [1,1,1,1,1,1,1,1,1,1,1,1],
+    { name: "Not agentic", labels: "autonomy: operator", p: [1,1,1,1,1,1,1,1,1,1,1,1],
       desc: "An AI system in the sense of art. 3(1) that takes an input, produces an output and stops: a prediction, a classification, or generated text on request. No run-time decisions about flow, tools or goal; a person or a fixed process acts on the output. Existing frameworks apply as they stand. Whether the input is a record or a prompt makes no difference here.",
       ex: ["Risk score for fraud or non-compliance, used by a case handler", "Document classifier or OCR feeding a case system", "Demand or capacity forecasting model", "Spam or abuse filter that labels messages", "Drafting and summarising support for a policy officer", "Reformulating letters to citizens at B1 level, officer sends"] },
-    { name: "Scripted workflow", labels: "human role: collaborator", p: [2,2,1,3,1,1,1,1,1,1,1,2],
+    { name: "Scripted workflow", labels: "autonomy: collaborator", p: [2,2,1,3,1,1,1,1,1,1,1,2],
       desc: "People fixed the steps; the model fills slots and picks branches. Often marketed as agentic, and mostly covered by existing frameworks.",
       ex: ["Intake, classification and routing of incoming documents", "Extracting fields from forms into a case system", "Triage of information requests by topic and urgency", "Customer service chatbot with fixed intents and scripted flows, model picks the intent", "Retrieval-based Q&A assistant: documents are fetched by code and injected, the model only answers", "E-mail classifier that files messages and sends a template reply per category"] },
-    { name: "Tool-using agent", labels: "human role: consultant", p: [3,3,3,3,3,3,3,1,1,1,1,3],
+    { name: "Tool-using agent", labels: "autonomy: consultant", p: [3,3,3,3,3,3,3,1,1,1,1,3],
       desc: "The model decides which tools to call and when, within one case, with a person steering. The first archetype where an action in a system is a model decision.",
       ex: ["A case handler steers an agent that looks up and updates records", "Preparing a draft decision with retrieved precedents, handler approves", "Answering citizen questions with lookups in registers, handler checks", "Coding assistant in agent mode: edits files and runs tests, developer approves each change", "Customer service agent that looks up an order and proposes a refund, agent confirms before it is issued", "Research assistant that searches, reads and compiles a briefing while the user steers"] },
-    { name: "Autonomous agent", labels: "human role: observer", p: [4,3,3,5,5,3,5,1,1,1,1,5],
+    { name: "Autonomous agent", labels: "autonomy: observer", p: [4,3,3,5,5,3,5,1,1,1,1,5],
       desc: "Runs unattended within a mandate; a person monitors and can stop it. Errors propagate silently, so logging and the ability to undo carry the oversight.",
       ex: ["Unattended reconciliation between two registers", "Data quality repair in a basisregistratie", "Monitoring agent that flags anomalies and opens tickets", "Chat moderation agent that hides or removes messages in a community channel, moderators review afterwards", "Background coding agent that picks up an issue, writes the fix and opens a pull request", "Agentic browser that completes a booking or a form end to end from one instruction", "E-mail agent that triages a mailbox and sends routine replies on its own"] },
-    { name: "Orchestrated multi-agent", labels: "human role: approver", p: [4,3,5,3,5,5,5,1,3,3,1,4],
+    { name: "Orchestrated multi-agent", labels: "autonomy: approver", p: [4,3,5,3,5,5,5,1,3,3,1,4],
       desc: "Several agents with distinct roles under one owner and one orchestrator; a person approves the plan or the high-risk steps. Attribution inside the system is the problem.",
       ex: ["Inspectorate analysis pipeline: planner, retriever, checker", "Policy analysis pipeline producing an assessed memo", "Grant application assessment with a separate reviewer agent", "Software engineering team of agents: planner, coder, tester, under one orchestrator", "Deep research system that spawns sub-agents per sub-question and merges their findings", "Content pipeline: writer, fact-checker and editor agents before a person publishes"] },
-    { name: "Cross-organisation agents", labels: "human role: observer", p: [5,5,5,5,5,5,5,3,5,5,5,5],
+    { name: "Cross-organisation agents", labels: "autonomy: observer", p: [5,5,5,5,5,5,5,3,5,5,5,5],
       desc: "Agents owned by different organisations interact through protocols; no single party can apply approval, boundary or monitoring to the whole exchange. No governance story exists yet.",
       ex: ["Agents acting across a chain of executive bodies", "Citizens' own agents applying for services", "Agents negotiating data exchange between municipalities and national registers", "Shopping agents negotiating with merchant agents on price and delivery", "Company agents interoperating through open protocols, each answering to its own owner", "Automated bidding or procurement agents dealing with counterpart agents"] }
   ];
@@ -325,10 +325,10 @@
     { title: "Low agency", when: "agency level 2: the highest agency dimension is 2", ctx: false,
       test: (g, c, ag) => ag.level === 2,
       text: (g, c, ag) => "The only agentic element is " + ag.drivers.join(", ").toLowerCase() + ", one step above fixed. Existing frameworks largely cover this; the question to ask is whether that one step is where errors would hide." },
-    { title: "Approval bottleneck", when: "control flow ≥ 4 and human role ≤ 2", ctx: false,
+    { title: "Approval bottleneck", when: "control flow ≥ 4 and autonomy ≤ 2", ctx: false,
       test: (g) => g("control") >= 4 && g("human") <= 2,
       text: () => "The model controls the loop while a person approves nearly every step. Under volume this becomes rubber stamping; approval quality is the thing to measure." },
-    { title: "Unmediated effect", when: "directness of impact = 5 and human role ≥ 4", ctx: false,
+    { title: "Unmediated effect", when: "directness of impact = 5 and autonomy ≥ 4", ctx: false,
       test: (g) => g("impact") >= 4 && g("human") >= 4,
       text: () => "Actions reach citizens or the world without a person in between. Reversibility and traceability carry the whole oversight burden here." },
     { title: "No single owner", when: "ownership = 5", ctx: false,
@@ -345,13 +345,13 @@
       text: () => "Several agents with no orchestration. Coordination failures of the kind Hammond et al. describe are likely; check how they interact." },
     { title: "Irreversible and unmediated", when: "directness of impact = 5 and reversibility = 5", ctx: true,
       test: (g, c) => g("impact") >= 4 && c("reversibility") >= 4,
-      text: () => "Actions reach the world without a person in between and cannot be taken back. This is the one combination where a person has to sit before the action, not after it: move human role to approver or lower." },
+      text: () => "Actions reach the world without a person in between and cannot be taken back. This is the one combination where a person has to sit before the action, not after it: move autonomy to approver or lower." },
     { title: "Cheap control available", when: "directness of impact ≥ 3 and reversibility = 1", ctx: true,
       test: (g, c) => g("impact") >= 3 && c("reversibility") <= 2,
       text: () => "The actions can be undone. Logging plus rollback is a stronger and cheaper hold here than approval gates; invest there first." },
-    { title: "Monitoring is not enough", when: "human role ≥ 4 and error tolerance = 5", ctx: true,
+    { title: "Monitoring is not enough", when: "autonomy ≥ 4 and error tolerance = 5", ctx: true,
       test: (g, c) => g("human") >= 4 && c("tolerance") >= 4,
-      text: () => "Errors in this domain cause harm before they can be caught, and the person only monitors or audits. Detection after the fact does not protect anyone; move the human role left or lower the tool reach." },
+      text: () => "Errors in this domain cause harm before they can be caught, and the person only monitors or audits. Detection after the fact does not protect anyone; move autonomy left or lower the tool reach." },
     { title: "Sensitive data crossing boundaries", when: "data sensitivity = 5 and (tool use ≥ 4 or ownership ≥ 3)", ctx: true,
       test: (g, c) => c("sensitivity") >= 4 && (g("tools") >= 4 || g("owner") >= 3),
       text: () => "Special-category or classified data reaches external systems or other owners. This is a data protection question before it is an agent question; involve the legal track." },
